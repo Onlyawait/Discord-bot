@@ -24,7 +24,7 @@ intents = discord.Intents.default()
 intents.members = True
 ARTBot = commands.Bot(command_prefix="$", intents=intents)
 ARTBot.remove_command("help")
-token = 'your Token Bot'
+token = 'NzUzOTQ2MDQyNTkyMDAyMDU4.X1tk-A.xXis4JheNzBVpNx5dGUTGEf7aFw'
 
 
 @ARTBot.event
