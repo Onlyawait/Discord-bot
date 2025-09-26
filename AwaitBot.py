@@ -101,12 +101,9 @@ async def help(ctx):
     user_id = 602929951519408133
     user = discord.utils.get(ctx.guild.members, id=int(user_id))
     embed = discord.Embed(colour=discord.Colour.blue())
-    embed.add_field(name='<:pencil:835493525457600554> Normal', value='```youtube: Display youtube channel information.\n'
-                                                                      'avatar: Get user avatar.\n'
+    embed.add_field(name='<:pencil:835493525457600554> Normal', value='```avatar: Get user avatar.\n'
                                                                       'server: Get server detail\n'
-                                                                      'users: Get info about member in discord.\n'
-                                                                      'git: show github information.\n'
-                                                                      'anime: Get info about anime in myanimelist.```', inline=False)
+                                                                      'users: Get info about member in discord.```', inline=False)
     embed.add_field(name='<:gear:835520233371336724> Moderation',
                     value='```roles: Add roles ot Member.\n'
                           'move: Move a member to another voice Channels.\n'
@@ -229,97 +226,6 @@ async def unban(ctx, id: int):
     send = discord.Embed(title=f"unBan {user.name}!", colour=discord.Colour.random())
     await ctx.channel.send(embed=send)
 
-
-@ARTBot.command(pass_context=True)
-async def youtube(ctx, name):
-    request = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&q={name}&key=AIzaSyDYz8Y2r7IbZT8VChEUSOanOMnGu44jzGs&maxResults=1&type=channels").text
-    title = re.compile('"title": "(.*?)"').search(request)[1]
-    channelId = re.compile('"channelId": "(.*?)"').search(request)[1]
-    pic = re.compile('"url": "(.*?)"').search(request)[1]
-    publishTime = re.compile('"publishTime": "(.*?)"').search(request)[1]
-    description = re.compile('"description": "(.*?)"').search(request)[1]
-    youtube2 = build('youtube', 'v3', developerKey='AIzaSyDYz8Y2r7IbZT8VChEUSOanOMnGu44jzGs')
-    ch_request = youtube2.channels().list(part='statistics', id=channelId)
-    ch_response = ch_request.execute()
-    sub = ch_response['items'][0]['statistics']['subscriberCount']
-    vid = ch_response['items'][0]['statistics']['videoCount']
-    views = ch_response['items'][0]['statistics']['viewCount']
-    embed = discord.Embed(title="", colour=discord.Colour.random(),
-                          description=title)
-    embed.add_field(name='subscriberCount', value=sub, inline=False)
-    embed.add_field(name='videoCount', value=vid, inline=True)
-    embed.add_field(name='viewCount', value=views, inline=True)
-    publishTime = re.compile('(.*?)T(.*?)').search(publishTime)[1]
-    embed.add_field(name='join youtube', value=utc(publishTime).format("dddd, MMMM, D YYYY"), inline=False)
-    embed.set_thumbnail(url=pic)
-    embed.set_footer(text="By await @_824",
-                     icon_url="https://www.upload.ee/image/13011911/72e9a040a03664e1749e39bd2a3ed554.png")
-    await ctx.send(embed=embed)
-
-
-@ARTBot.command(pass_context=True)
-async def git(ctx, user):
-    req = requests.get(f'https://api.github.com/users/{user}').text
-    avatar_url = re.compile('"avatar_url":"(.*?)",').search(req)[1]
-    Name = re.compile('"name":"(.*?)",').search(req)[1]
-    twitter_username = re.compile('"twitter_username":(.*?),').search(req)[1]
-    followers = re.compile('"followers":(.*?),').search(req)[1]
-    following = re.compile('"following":(.*?),').search(req)[1]
-    created_at = re.compile('"created_at":"(.*?)",').search(req)[1]
-    blog = re.compile('"blog":"(.*?)",').search(req)[1]
-    bio = re.compile('"bio":(.*?),').search(req)[1]
-    public_repos = re.compile('"public_repos":(.*?),').search(req)[1]
-    embed = discord.Embed(colour=discord.Colour.random())
-    embed.set_author(name=user, icon_url=avatar_url)
-    embed.set_footer(text="By await @_824",
-                     icon_url="https://www.upload.ee/image/13011911/72e9a040a03664e1749e39bd2a3ed554.png")
-    embed.add_field(name='Name', value=Name, inline=True)
-    embed.add_field(name='bio', value=bio, inline=True)
-    embed.add_field(name='Twitter', value=twitter_username, inline=False)
-    embed.add_field(name='Blog', value=blog, inline=False)
-    embed.add_field(name='Repositories', value=public_repos, inline=True)
-    embed.add_field(name='followers', value=followers, inline=True)
-    embed.add_field(name='following', value=following, inline=True)
-    created_at = re.compile('(.*?)T(.*?)').search(created_at)[1]
-    embed.add_field(name='Account Created', value=utc(created_at).format("dddd, MMMM, D YYYY"), inline=False)
-    embed.set_thumbnail(url=avatar_url)
-    await ctx.send(embed=embed)
-
-
-@ARTBot.command()
-async def anime(ctx, Name=None):
-    if Name == None:
-        pass
-    req = requests.get(f"https://myanimelist.net/search/prefix.json?type=anime&keyword={Name}&v=1").text
-    image_url = re.compile('"image_url":"(.*?)",').search(req)[1]
-    avatar_url = image_url.replace('\\', "")
-    url = re.compile('"url":"(.*?)",').search(req)[1]
-    url = url.replace('\\', "")
-    media_type = re.compile('"media_type":"(.*?)",').search(req)[1]
-    start_year = re.compile('"start_year":(.*?),').search(req)[1]
-    score = re.compile('"score":"(.*?)",').search(req)[1]
-    status = re.compile('"status":"(.*?)"}').search(req)[1]
-    Name = re.compile('"name":"(.*?)",').search(req)[1]
-    req2 = requests.get(url).text
-    rank = re.compile('<span class="dark_text">Ranked:</span>\n  (.*?)<sup>2</sup>').search(req2)[1]
-    Members = re.compile('<span class="dark_text">Members:</span>\n    (.*?)\n</div>\n<div>').search(req2)[1]
-    Episodes = re.compile('<span class="dark_text">Episodes:</span>\n  (.*?)\n  </div>').search(req2)[1]
-    embed = discord.Embed(colour=discord.Colour.random())
-    embed.set_author(name=Name, icon_url=avatar_url)
-    embed.set_footer(text="By await @_824",
-                     icon_url="https://www.upload.ee/image/13011911/72e9a040a03664e1749e39bd2a3ed554.png")
-    embed.add_field(name='Name', value=Name, inline=True)
-    embed.add_field(name='Episodes', value=Episodes, inline=True)
-    embed.add_field(name='media_type', value=media_type, inline=False)
-    embed.add_field(name='score', value=score, inline=True)
-    embed.add_field(name='rank', value=rank, inline=True)
-    embed.add_field(name='Members', value=Members, inline=True)
-    embed.add_field(name='status', value=status, inline=False)
-    embed.add_field(name='start_year', value=start_year, inline=False)
-    embed.set_thumbnail(url=avatar_url)
-    await ctx.send(embed=embed)
-
-
 @roles.error
 async def roles_error(ctx, error):
     embed = discord.Embed()
@@ -376,14 +282,6 @@ async def move_error(ctx, error):
     await ctx.reply(embed=embed)
 
 
-@git.error
-async def git_error(ctx, error):
-    await ctx.reply("i can't get any info from this user")
-
-
-@youtube.error
-async def youtube_error(ctx, error):
-    await ctx.reply("i can't get any info from this channels")
-
 
 ARTBot.run(token)
+
